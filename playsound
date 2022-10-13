@@ -1,0 +1,32 @@
+#!/bin/bash
+
+user="$(ls /home)"
+while [ 1 ]; do
+	CAP=$(cat /sys/class/power_supply/BAT0/capacity)
+	AC=$(cat /sys/class/power_supply/AC/online)
+    VOL=$(amixer get Master | grep Mono: | awk '{ print $4 }')
+    VOL=${VOL:1:3}
+    #Device="-D pulse"
+    Device=""
+
+	if [ $CAP -lt 22 ] && [ $AC = 0 ] 
+	then
+		amixer $Device sset Master 50%
+
+        sleep 1 # To not be choppy
+		aplay /home/$user/.local/media/sound.wav
+	fi
+	
+	#if [ $CAP -gt 76 ] && [ $AC = 1 ] 
+	if [ $CAP -gt 20 ] && [ $AC = 1 ] 
+	then
+		amixer $Device sset Master 50%
+
+        sleep 1 # To not be choppy
+		aplay /home/$user/.local/media/sound.wav
+	fi
+
+    # Reset volume to volume initial
+    amixer sset Master $VOL
+	sleep 60
+done
